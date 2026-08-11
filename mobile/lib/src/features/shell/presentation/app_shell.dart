@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_tokens.dart';
 import '../../../core/theme/theme_controller.dart';
+import '../../applications/presentation/applications_page.dart';
+import '../../applications/presentation/dashboard_page.dart';
 import '../../auth/application/auth_controller.dart';
 
 class AppShell extends StatefulWidget {
@@ -17,22 +20,12 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
-    final pages = <Widget>[
-      const _DashboardPage(),
-      const _EmptyPage(
-        icon: Icons.work_outline_rounded,
-        title: 'No applications yet',
-        message:
-            'Your job search starts here. Add your first opportunity when you are ready.',
-      ),
-      const SizedBox.shrink(),
-      const _EmptyPage(
-        icon: Icons.insights_outlined,
-        title: 'Your progress will appear here',
-        message:
-            'Analytics become useful once you begin tracking applications.',
-      ),
-      const _ProfilePage(),
+    const pages = <Widget>[
+      DashboardPage(),
+      ApplicationsPage(),
+      SizedBox.shrink(),
+      _StatsPreview(),
+      _ProfilePage(),
     ];
     return Scaffold(
       body: IndexedStack(index: _index, children: pages),
@@ -40,11 +33,7 @@ class _AppShellState extends State<AppShell> {
         selectedIndex: _index,
         onDestinationSelected: (index) {
           if (index == 2) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Application creation arrives in Phase 2.'),
-              ),
-            );
+            context.push('/applications/new');
             return;
           }
           setState(() => _index = index);
@@ -81,166 +70,44 @@ class _AppShellState extends State<AppShell> {
   }
 }
 
-class _DashboardPage extends ConsumerWidget {
-  const _DashboardPage();
+class _StatsPreview extends StatelessWidget {
+  const _StatsPreview();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(authControllerProvider).user;
-    final name = (user?['full_name'] as String? ?? 'there').split(' ').first;
-    return SafeArea(
-      child: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Good to see you,',
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    Text(
-                      name,
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                  ],
-                ),
-              ),
-              const CircleAvatar(child: Icon(Icons.person_outline_rounded)),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          Card(
-            color: Theme.of(context).colorScheme.primaryContainer,
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.track_changes_rounded,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(height: AppSpacing.lg),
-                  Text(
-                    'Build momentum, one application at a time.',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  const Text(
-                    'Your dashboard will surface the next step that deserves your attention.',
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Text('Overview', style: Theme.of(context).textTheme.titleLarge),
-          const SizedBox(height: AppSpacing.md),
-          const Row(
-            children: [
-              Expanded(
-                child: _Metric(label: 'Applications', value: '0'),
-              ),
-              SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: _Metric(label: 'Interviews', value: '0'),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          const _EmptyPage(
-            embedded: true,
-            icon: Icons.calendar_today_outlined,
-            title: 'Nothing needs attention',
-            message: 'Upcoming interviews and follow-ups will appear here.',
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _Metric extends StatelessWidget {
-  const _Metric({required this.label, required this.value});
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) => Card(
+  Widget build(BuildContext context) => SafeArea(
     child: Padding(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(value, style: Theme.of(context).textTheme.headlineMedium),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            label,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+          Text('Insights', style: Theme.of(context).textTheme.headlineMedium),
+          const Spacer(),
+          Center(
+            child: Column(
+              children: [
+                Icon(
+                  Icons.insights_outlined,
+                  size: 48,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  'Your progress will appear here',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                const Text(
+                  'Detailed conversion analytics arrive in Phase 5.',
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
+          const Spacer(),
         ],
       ),
     ),
   );
-}
-
-class _EmptyPage extends StatelessWidget {
-  const _EmptyPage({
-    required this.icon,
-    required this.title,
-    required this.message,
-    this.embedded = false,
-  });
-  final IconData icon;
-  final String title;
-  final String message;
-  final bool embedded;
-
-  @override
-  Widget build(BuildContext context) {
-    final content = Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.secondaryContainer,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                color: Theme.of(context).colorScheme.onSecondaryContainer,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-    return embedded ? Card(child: content) : SafeArea(child: content);
-  }
 }
 
 class _ProfilePage extends ConsumerWidget {

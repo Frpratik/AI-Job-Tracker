@@ -32,9 +32,10 @@ logs.
 
 ## API
 
-The backend begins with the `accounts` bounded context. New Django apps are
-introduced when a feature owns distinct models and workflows; the project does
-not pre-create empty apps.
+The backend currently has `accounts` and `applications` bounded contexts. The
+applications context owns companies, jobs, tracked applications, status
+history, notes, and tags. New Django apps are introduced only when a feature
+owns distinct models and workflows; the project does not pre-create empty apps.
 
 API responses follow one of these shapes:
 
@@ -69,4 +70,3 @@ must never determine ownership.
   will be added with application models.
 - Staging/production: managed PostgreSQL, HTTPS, private object storage, and
   environment-managed secrets.
-

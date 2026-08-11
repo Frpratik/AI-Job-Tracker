@@ -111,6 +111,14 @@ class ApiClient {
     }
   }
 
+  Future<void> delete(String path) async {
+    try {
+      await _dio.delete<void>(path);
+    } on DioException catch (error) {
+      throw _mapError(error);
+    }
+  }
+
   ApiException _mapError(DioException error) {
     final body = error.response?.data;
     if (body is Map<String, dynamic>) {

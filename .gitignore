@@ -18,6 +18,7 @@ staticfiles/
 # Flutter / Dart
 .flutter-sdk/
 .tool-home/
+.run/
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies

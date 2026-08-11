@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/application/auth_controller.dart';
 import '../../features/auth/presentation/auth_screen.dart';
 import '../../features/auth/presentation/forgot_password_screen.dart';
+import '../../features/applications/presentation/application_detail_screen.dart';
+import '../../features/applications/presentation/application_form_screen.dart';
 import '../../features/onboarding/presentation/welcome_screen.dart';
 import '../../features/onboarding/presentation/profile_setup_screen.dart';
 import '../../features/shell/presentation/app_shell.dart';
@@ -56,6 +58,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (_, _) => const ProfileSetupScreen(),
       ),
       GoRoute(path: '/home', builder: (_, _) => const AppShell()),
+      GoRoute(
+        path: '/applications/new',
+        builder: (_, _) => const ApplicationFormScreen(),
+      ),
+      GoRoute(
+        path: '/applications/:id/edit',
+        builder: (_, state) =>
+            EditApplicationScreen(id: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/applications/:id',
+        builder: (_, state) =>
+            ApplicationDetailScreen(id: state.pathParameters['id']!),
+      ),
     ],
   );
 });

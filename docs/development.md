@@ -17,6 +17,14 @@ python -m venv .venv
 
 API documentation is available at `http://127.0.0.1:8000/api/v1/docs/`.
 
+Create the optional local preview data with:
+
+```powershell
+$env:DB_ENGINE='sqlite'
+.venv\Scripts\python manage.py migrate
+.venv\Scripts\python manage.py seed_demo
+```
+
 For tests that do not require a running PostgreSQL instance:
 
 ```powershell
@@ -37,6 +45,15 @@ flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1
 
 Use `127.0.0.1` rather than `10.0.2.2` for an iOS simulator. Physical devices
 must use the development machine's reachable LAN address.
+
+For the browser development preview, run on a fixed port so Django can allow a
+specific CORS origin:
+
+```powershell
+$env:CORS_ALLOWED_ORIGINS='http://127.0.0.1:5173'
+flutter run -d web-server --web-hostname 127.0.0.1 --web-port 5173 `
+  --dart-define=API_BASE_URL=http://127.0.0.1:8000/api/v1
+```
 
 ## Quality checks
 

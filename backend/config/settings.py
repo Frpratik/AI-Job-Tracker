@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
     "apps.accounts",
+    "apps.applications",
 ]
 
 MIDDLEWARE = [
@@ -123,6 +124,9 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "Versioned API for the JobTracker mobile application.",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    "ENUM_NAME_OVERRIDES": {
+        "ApplicationStatusEnum": "apps.applications.models.Application.Status",
+    },
 }
 
 CORS_ALLOWED_ORIGINS = [
