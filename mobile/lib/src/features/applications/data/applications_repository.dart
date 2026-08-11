@@ -120,5 +120,27 @@ class ApplicationsRepository {
     );
   }
 
+  Future<List<Map<String, dynamic>>> tags() async {
+    final response = await _api.get('/tags/');
+    final data = response['data'] as Map<String, dynamic>;
+    return List<Map<String, dynamic>>.from(data['results'] as List);
+  }
+
+  Future<Map<String, dynamic>> createTag(String name) async {
+    final response = await _api.post(
+      '/tags/',
+      data: {'name': name, 'color': '#1F6A4A'},
+    );
+    return response['data'] as Map<String, dynamic>;
+  }
+
+  Future<JobApplication> setTags(String id, List<String> tagIds) async {
+    final response = await _api.patch(
+      '/applications/$id/',
+      data: {'tag_ids': tagIds},
+    );
+    return JobApplication.fromJson(response['data'] as Map<String, dynamic>);
+  }
+
   Future<void> delete(String id) async => _api.delete('/applications/$id/');
 }

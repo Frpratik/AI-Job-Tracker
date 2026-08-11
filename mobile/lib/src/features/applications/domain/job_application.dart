@@ -14,6 +14,7 @@ class JobApplication {
     required this.updatedAt,
     required this.statusHistory,
     required this.notes,
+    required this.tags,
   });
 
   final String id;
@@ -30,6 +31,7 @@ class JobApplication {
   final DateTime? updatedAt;
   final List<Map<String, dynamic>> statusHistory;
   final List<Map<String, dynamic>> notes;
+  final List<Map<String, dynamic>> tags;
 
   factory JobApplication.fromJson(Map<String, dynamic> json) {
     final job = json['job'] as Map<String, dynamic>? ?? const {};
@@ -53,6 +55,7 @@ class JobApplication {
       notes: List<Map<String, dynamic>>.from(
         json['notes'] as List? ?? const [],
       ),
+      tags: List<Map<String, dynamic>>.from(json['tags'] as List? ?? const []),
     );
   }
 }

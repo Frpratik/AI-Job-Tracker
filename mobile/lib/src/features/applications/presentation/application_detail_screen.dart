@@ -119,6 +119,43 @@ class ApplicationDetailScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Tags',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => _manageTags(context, ref, application),
+                    icon: const Icon(Icons.sell_outlined),
+                    label: const Text('Manage'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              if (application.tags.isEmpty)
+                Text(
+                  'Add tags such as Dream role, Referral, or Follow up.',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                )
+              else
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
+                  children: application.tags
+                      .map(
+                        (tag) => Chip(
+                          avatar: const Icon(Icons.sell_outlined, size: 16),
+                          label: Text(tag['name'] as String? ?? ''),
+                        ),
+                      )
+                      .toList(),
+                ),
+              const SizedBox(height: AppSpacing.lg),
               Text('Timeline', style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: AppSpacing.md),
               Card(
@@ -254,6 +291,102 @@ class ApplicationDetailScreen extends ConsumerWidget {
     if (note == null || note.isEmpty) return;
     await ref.read(applicationsRepositoryProvider).addNote(id, note);
     ref.invalidate(applicationDetailProvider(id));
+  }
+
+  Future<void> _manageTags(
+    BuildContext context,
+    WidgetRef ref,
+    JobApplication application,
+  ) async {
+    final repository = ref.read(applicationsRepositoryProvider);
+    final available = await repository.tags();
+    final selected = application.tags.map((tag) => tag['id'] as String).toSet();
+    final name = TextEditingController();
+    if (!context.mounted) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (context, setSheetState) => Padding(
+          padding: EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            0,
+            AppSpacing.lg,
+            MediaQuery.viewInsetsOf(context).bottom + AppSpacing.lg,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Organize with tags',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              if (available.isEmpty)
+                const Text('Create your first tag below.')
+              else
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
+                  children: available
+                      .map(
+                        (tag) => FilterChip(
+                          label: Text(tag['name'] as String),
+                          selected: selected.contains(tag['id']),
+                          onSelected: (value) => setSheetState(() {
+                            value
+                                ? selected.add(tag['id'] as String)
+                                : selected.remove(tag['id']);
+                          }),
+                        ),
+                      )
+                      .toList(),
+                ),
+              const SizedBox(height: AppSpacing.lg),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: name,
+                      decoration: const InputDecoration(
+                        hintText: 'New tag name',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  IconButton.filledTonal(
+                    tooltip: 'Create tag',
+                    onPressed: () async {
+                      final value = name.text.trim();
+                      if (value.isEmpty) return;
+                      final tag = await repository.createTag(value);
+                      setSheetState(() {
+                        available.add(tag);
+                        selected.add(tag['id'] as String);
+                        name.clear();
+                      });
+                    },
+                    icon: const Icon(Icons.add_rounded),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              FilledButton(
+                onPressed: () async {
+                  await repository.setTags(id, selected.toList());
+                  ref.invalidate(applicationDetailProvider(id));
+                  if (sheetContext.mounted) Navigator.pop(sheetContext);
+                },
+                child: const Text('Save tags'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    name.dispose();
   }
 
   Future<void> _delete(

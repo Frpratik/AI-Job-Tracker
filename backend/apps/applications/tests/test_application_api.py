@@ -145,6 +145,17 @@ class ApplicationApiTests(APITestCase):
         self.assertEqual(attached.data["data"]["tags"][0]["name"], "Dream role")
         self.assertEqual(rejected.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_tag_api_returns_owned_tags_in_success_envelope(self):
+        created = self.client.post(
+            reverse("tag-list"), {"name": "Follow up", "color": "#1F6A4A"}, format="json"
+        )
+        listed = self.client.get(reverse("tag-list"))
+
+        self.assertEqual(created.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(created.data["success"])
+        self.assertEqual(listed.data["data"]["count"], 1)
+        self.assertEqual(listed.data["data"]["results"][0]["name"], "Follow up")
+
     def test_owner_can_delete_application(self):
         created = self.create_application()
         application_id = created.data["data"]["id"]

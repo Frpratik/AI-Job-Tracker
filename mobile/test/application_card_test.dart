@@ -22,6 +22,7 @@ void main() {
       updatedAt: DateTime(2026, 8, 12),
       statusHistory: const [],
       notes: const [],
+      tags: const [],
     );
 
     await tester.pumpWidget(

@@ -121,6 +121,32 @@ class TagViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    def list(self, request, *args, **kwargs):
+        page = self.paginate_queryset(self.get_queryset())
+        serializer = self.get_serializer(
+            page if page is not None else self.get_queryset(), many=True
+        )
+        if page is not None:
+            return success(self.get_paginated_response(serializer.data).data)
+        return success(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return success(serializer.data, http_status=status.HTTP_201_CREATED)
+
+    def retrieve(self, request, *args, **kwargs):
+        return success(self.get_serializer(self.get_object()).data)
+
+    def update(self, request, *args, **kwargs):
+        serializer = self.get_serializer(
+            self.get_object(), data=request.data, partial=kwargs.pop("partial", False)
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return success(serializer.data)
+
 
 class ApplicationNotesView(ListCreateAPIView):
     serializer_class = NoteSerializer

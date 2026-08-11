@@ -7,7 +7,8 @@
 - Paginated application CRUD, status transitions, archive, notes, tags,
   dashboard summaries, search, status/priority/work-mode filters, and sorting.
 - Flutter dashboard, application search/list, add/edit/detail/delete flows,
-  status timeline, notes, empty/loading/error states, and live refresh behavior.
+  status timeline, notes, tag management, empty/loading/error states, and live
+  refresh behavior.
 - Idempotent local demo seed and a web development preview alongside Android/iOS.
 
 ## Demo preview
