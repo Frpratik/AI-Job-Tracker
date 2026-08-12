@@ -16,6 +16,7 @@ from .views import (
     ReminderViewSet,
     TagViewSet,
 )
+from .views_analytics import AnalyticsView, ExportCSVView, ExportJSONView
 
 router = DefaultRouter(use_regex_path=False)
 router.register("applications", ApplicationViewSet, basename="application")
@@ -29,6 +30,9 @@ urlpatterns = [
     path("dashboard/", DashboardView.as_view(), name="dashboard"),
     path("calendar/", CalendarEventsView.as_view(), name="calendar-events"),
     path("notifications/", NotificationViewSet.as_view(), name="notifications"),
+    path("analytics/", AnalyticsView.as_view(), name="analytics"),
+    path("analytics/export/csv/", ExportCSVView.as_view(), name="analytics-export-csv"),
+    path("analytics/export/json/", ExportJSONView.as_view(), name="analytics-export-json"),
     path(
         "applications/<uuid:application_id>/notes/",
         ApplicationNotesView.as_view(),

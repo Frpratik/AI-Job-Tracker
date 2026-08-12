@@ -201,3 +201,51 @@ export interface DashboardData {
   pending_reminders: Reminder[];
   recent: Application[];
 }
+
+export interface FunnelStage {
+  stage: string;
+  count: number;
+  pct: number;
+}
+
+export interface SourceRoiItem {
+  source: string;
+  total_applications: number;
+  interviews: number;
+  offers: number;
+  conversion_rate_pct: number;
+}
+
+export interface WeeklyActivityItem {
+  week_label: string;
+  count: number;
+}
+
+export interface AnalyticsData {
+  timeframe: string;
+  summary: {
+    total_tracked: number;
+    applied_count: number;
+    wishlist_count: number;
+    screening_count: number;
+    interview_count: number;
+    offer_count: number;
+    accepted_count: number;
+    rejected_count: number;
+    withdrawn_count: number;
+  };
+  rates: {
+    interview_rate_pct: number;
+    offer_rate_pct: number;
+    interview_to_offer_pct: number;
+    avg_response_days: number;
+  };
+  funnel: FunnelStage[];
+  source_roi: SourceRoiItem[];
+  compensation: {
+    avg_salary_min: number;
+    avg_salary_max: number;
+    work_mode_distribution: Record<string, number>;
+  };
+  weekly_activity: WeeklyActivityItem[];
+}
