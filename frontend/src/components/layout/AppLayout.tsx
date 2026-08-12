@@ -118,22 +118,9 @@ export function AppLayout({ children }: AppLayoutProps) {
   ];
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--bg-main)' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', width: '100%', backgroundColor: 'var(--bg-main)' }}>
       {/* Desktop Sidebar */}
-      <aside
-        style={{
-          width: '260px',
-          borderRight: '1px solid var(--border-color)',
-          backgroundColor: 'var(--bg-card)',
-          display: 'flex',
-          flexDirection: 'column',
-          position: 'sticky',
-          top: 0,
-          height: '100vh',
-          zIndex: 40,
-        }}
-        className="hidden-mobile"
-      >
+      <aside className="desktop-sidebar">
         {/* Brand Header */}
         <div style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div
@@ -246,23 +233,9 @@ export function AppLayout({ children }: AppLayoutProps) {
       </aside>
 
       {/* Main Content Area */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, width: '100%' }}>
         {/* Top Header Bar */}
-        <header
-          style={{
-            height: '68px',
-            borderBottom: '1px solid var(--border-color)',
-            backgroundColor: 'var(--bg-glass)',
-            backdropFilter: 'blur(12px)',
-            position: 'sticky',
-            top: 0,
-            zIndex: 30,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '0 1.5rem',
-          }}
-        >
+        <header className="app-top-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <button
               className="btn-ghost show-mobile"
@@ -308,92 +281,81 @@ export function AppLayout({ children }: AppLayoutProps) {
           </div>
         </header>
 
-        {/* Mobile Dropdown Menu */}
+        {/* Mobile Dropdown Menu with Backdrop */}
         {isMobileMenuOpen && (
-          <div
-            className="glass-panel show-mobile"
-            style={{
-              position: 'fixed',
-              top: '68px',
-              left: 0,
-              right: 0,
-              zIndex: 50,
-              borderRadius: 0,
-              borderLeft: 'none',
-              borderRight: 'none',
-              padding: '1rem',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.5rem',
-            }}
-          >
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    padding: '0.75rem 1rem',
-                    borderRadius: 'var(--radius-md)',
-                    backgroundColor: isActive ? 'var(--primary-light)' : 'transparent',
-                    color: isActive ? 'var(--primary)' : 'var(--text-muted)',
-                    fontWeight: isActive ? 700 : 500,
-                  }}
-                >
-                  <Icon size={18} />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-            <div style={{ height: '1px', backgroundColor: 'var(--border-color)', margin: '0.5rem 0' }} />
-            <button
-              className="btn-ghost"
-              onClick={logout}
-              style={{ justifyContent: 'flex-start', color: 'var(--accent-rose)', padding: '0.75rem 1rem' }}
+          <>
+            <div
+              style={{
+                position: 'fixed',
+                inset: 0,
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                zIndex: 49,
+              }}
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+            <div
+              className="glass-panel animate-fade-in"
+              style={{
+                position: 'fixed',
+                top: '56px',
+                left: 0,
+                right: 0,
+                zIndex: 50,
+                borderRadius: 0,
+                borderLeft: 'none',
+                borderRight: 'none',
+                padding: '1rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.5rem',
+                maxHeight: 'calc(100vh - 140px)',
+                overflowY: 'auto',
+              }}
             >
-              <LogOut size={18} />
-              <span>Sign Out</span>
-            </button>
-          </div>
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.75rem',
+                      padding: '0.75rem 1rem',
+                      borderRadius: 'var(--radius-md)',
+                      backgroundColor: isActive ? 'var(--primary-light)' : 'transparent',
+                      color: isActive ? 'var(--primary)' : 'var(--text-muted)',
+                      fontWeight: isActive ? 700 : 500,
+                    }}
+                  >
+                    <Icon size={18} />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+              <div style={{ height: '1px', backgroundColor: 'var(--border-color)', margin: '0.5rem 0' }} />
+              <button
+                className="btn-ghost"
+                onClick={logout}
+                style={{ justifyContent: 'flex-start', color: 'var(--accent-rose)', padding: '0.75rem 1rem' }}
+              >
+                <LogOut size={18} />
+                <span>Sign Out</span>
+              </button>
+            </div>
+          </>
         )}
 
         {/* Main Body */}
-        <main
-          className="mobile-page-container"
-          style={{ flex: 1, padding: '1.25rem', maxWidth: '1440px', width: '100%', margin: '0 auto' }}
-        >
+        <main className="mobile-page-container">
           {children}
         </main>
 
-        {/* Mobile Bottom Navigation Bar (Visible on mobile/tablet screens <= 768px) */}
-        <nav
-          className="glass-panel show-mobile"
-          style={{
-            position: 'fixed',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            zIndex: 40,
-            borderRadius: 0,
-            borderBottom: 'none',
-            borderLeft: 'none',
-            borderRight: 'none',
-            borderTop: '1px solid var(--border-color)',
-            backgroundColor: 'var(--bg-glass)',
-            backdropFilter: 'blur(16px)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-around',
-            padding: '0.5rem 0.25rem',
-            paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))',
-          }}
-        >
+        {/* Mobile Bottom Navigation Bar */}
+        <nav className="mobile-bottom-nav">
           {[
             { label: 'Home', href: '/dashboard', icon: LayoutDashboard },
             { label: 'Jobs', href: '/applications', icon: Briefcase },
