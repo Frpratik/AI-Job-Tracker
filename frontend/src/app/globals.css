@@ -26,7 +26,7 @@
   --bg-card: #111726;
   --bg-card-hover: #161e31;
   --bg-subtle: #192238;
-  --bg-glass: rgba(17, 23, 38, 0.85);
+  --bg-glass: rgba(17, 23, 38, 0.88);
   --border-color: rgba(255, 255, 255, 0.08);
   --border-hover: rgba(255, 255, 255, 0.16);
 
@@ -50,7 +50,7 @@
   --bg-card: #ffffff;
   --bg-card-hover: #f1f5f9;
   --bg-subtle: #e2e8f0;
-  --bg-glass: rgba(255, 255, 255, 0.92);
+  --bg-glass: rgba(255, 255, 255, 0.94);
   --border-color: rgba(0, 0, 0, 0.08);
   --border-hover: rgba(0, 0, 0, 0.16);
 
@@ -320,27 +320,47 @@ a {
   scrollbar-width: none;
 }
 
-/* Desktop Sidebar */
+/* 1. App Layout Wrapper - Pinned Desktop Sidebar Architecture */
+.app-layout-wrapper {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--bg-main);
+}
+
+/* 2. Desktop Sidebar - Pinned Left Panel (Never scrolls with content) */
 .desktop-sidebar {
   width: 260px;
+  height: 100vh;
   border-right: 1px solid var(--border-color);
   background-color: var(--bg-card);
   display: flex;
   flex-direction: column;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  z-index: 40;
   flex-shrink: 0;
+  overflow-y: auto;
+  z-index: 40;
 }
 
-/* App Top Header */
+/* 3. App Main Viewport - Dedicated Right Scroll Container */
+.app-main-viewport {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* 4. App Top Header - Sticky in Viewport */
 .app-top-header {
   height: 64px;
   border-bottom: 1px solid var(--border-color);
   background-color: var(--bg-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   position: sticky;
   top: 0;
   z-index: 30;
@@ -348,9 +368,19 @@ a {
   align-items: center;
   justify-content: space-between;
   padding: 0 1.5rem;
+  flex-shrink: 0;
 }
 
-/* Mobile Bottom Navigation Bar */
+/* 5. Mobile Page Container */
+.mobile-page-container {
+  flex: 1;
+  padding: 1.5rem;
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* 6. Mobile Bottom Navigation Bar */
 .mobile-bottom-nav {
   position: fixed;
   bottom: 0;
@@ -369,14 +399,6 @@ a {
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
 }
 
-.mobile-page-container {
-  flex: 1;
-  padding: 1.5rem;
-  max-width: 1440px;
-  width: 100%;
-  margin: 0 auto;
-}
-
 /* Breakpoints */
 @media (max-width: 1024px) {
   .card {
@@ -385,6 +407,12 @@ a {
 }
 
 @media (max-width: 768px) {
+  .app-layout-wrapper {
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow-y: visible !important;
+  }
+
   .hidden-mobile {
     display: none !important;
   }
@@ -395,6 +423,11 @@ a {
 
   .desktop-sidebar {
     display: none !important;
+  }
+
+  .app-main-viewport {
+    height: auto !important;
+    overflow-y: visible !important;
   }
 
   .mobile-bottom-nav {
@@ -408,7 +441,7 @@ a {
 
   .mobile-page-container {
     padding: 0.85rem !important;
-    padding-bottom: 92px !important;
+    padding-bottom: 96px !important;
   }
   
   .card {

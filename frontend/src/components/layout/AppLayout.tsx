@@ -118,7 +118,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   ];
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', width: '100%', backgroundColor: 'var(--bg-main)' }}>
+    <div className="app-layout-wrapper">
       {/* Desktop Sidebar */}
       <aside className="desktop-sidebar">
         {/* Brand Header */}
@@ -232,8 +232,8 @@ export function AppLayout({ children }: AppLayoutProps) {
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, width: '100%' }}>
+      {/* Main Content Area (Scrolls independently on desktop) */}
+      <div className="app-main-viewport">
         {/* Top Header Bar */}
         <header className="app-top-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
