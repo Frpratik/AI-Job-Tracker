@@ -2,48 +2,64 @@
 
 ## System Overview
 
-JobTracker uses a decoupled monorepo architecture:
-* **Frontend**: Next.js 16 (App Router) + React 19 + TypeScript with custom Modern CSS Design System.
-* **Backend**: Django 5.2 + Django REST Framework (`/api/v1`) with modular apps (`accounts`, `applications`, `documents`).
-* **Database**: PostgreSQL (Production/Docker) / SQLite (Fast Local Test/Dev).
+JobTracker uses a decoupled, high-performance monorepo architecture:
+* **Frontend**: Next.js 16 (App Router) + React 19 + TypeScript with a custom Modern CSS Design System.
+* **Backend**: Django 5.2 + Django REST Framework (`/api/v1`) with modular apps (`accounts`, `applications`, `documents`, `ai_assistant`, `billing`).
+* **Caching & Broker**: Redis 7 Alpine.
+* **Database**: PostgreSQL 16 (Production / Docker Compose) / SQLite (Fast Local Dev/Test).
 
 ```text
 Next.js 16 (App Router + React 19 + TypeScript)
-        |
-        | REST / JSON / JWT (Bearer auth + refresh rotation)
-        v
+        │
+        │  REST / JSON / JWT (Bearer auth + refresh rotation)
+        ▼
 Django REST Framework (/api/v1)
         ├── apps.accounts     (Auth, JWT tokens, Onboarding profiles)
-        ├── apps.applications (Pipeline, Jobs, Recruiters, Interviews, Activity, Reminders)
-        └── apps.documents    (Resumes, Cover Letters, PDF Storage & Preview)
-        |
-        v
-PostgreSQL / SQLite
+        ├── apps.applications (Pipeline, Jobs, Recruiters, Interviews, Activity, Reminders, Analytics)
+        ├── apps.documents    (Resumes, Cover Letters, PDF Storage & Preview)
+        ├── apps.ai_assistant (ATS Matcher, Cover Letter Studio, STAR Interview Coach)
+        └── apps.billing      (Subscriptions, Quotas, Plans & Entitlements)
+        │
+   ┌────┴────────────┐
+   ▼                 ▼
+PostgreSQL 16     Redis 7
 ```
 
-## Frontend Architecture (`frontend/`)
+---
 
-* **App Router (`src/app/`)**: High-performance streaming routes for Dashboard, Pipeline, Applications, Documents, Calendar, Recruiters, and Settings.
-* **Modern Design System (`src/app/globals.css`)**: Emerald & slate color tokens, responsive sidebar, glassmorphic surfaces, instant dark/light mode switching, and micro-animations.
-* **API Client (`src/lib/api.ts`)**: Resilient HTTP client with automatic `Authorization: Bearer <token>` injection and seamless token refresh retry on `401 Unauthorized`.
-* **State & Auth (`src/context/AuthContext.tsx`)**: Global user session with automatic token hydration and demo mode support.
+## 1. Frontend Architecture (`frontend/`)
 
-## Backend Architecture (`backend/`)
+* **App Router (`src/app/`)**: 17 production routes including Dashboard, Pipeline, Applications, Documents, Analytics, AI Copilot, Billing, Calendar, Recruiters, Profile, Login, Register, and Onboarding.
+* **Modern Design System (`src/app/globals.css`)**: Emerald brand tokens, responsive desktop sidebar + mobile bottom navigation bar, glassmorphism, dark/light theme switcher, touch-optimized targets.
+* **API Client (`src/lib/api.ts`)**: Resilient HTTP client with automatic `Authorization: Bearer <token>` injection and token refresh rotation on `401 Unauthorized`.
+* **State & Auth (`src/context/AuthContext.tsx`)**: Global user session with automatic token hydration and 1-click demo login support.
+
+---
+
+## 2. Backend Architecture (`backend/`)
 
 * **Apps Layout**:
   * `apps.accounts`: Custom `User` model, email verification, password reset, and career `Profile`.
-  * `apps.applications`: `Application`, `Company`, `Job`, `StatusHistory`, `Note`, `Tag`, `Recruiter`, `Interview`, `Communication`, `Reminder`, `Notification`.
-  * `apps.documents`: `Document` (Resumes, cover letters, portfolios, attachments, storage, and primary resume toggling).
+  * `apps.applications`: Core job applications, multi-round interviews, recruiter directory, activity logs, reminders, and `analytics_service.py`.
+  * `apps.documents`: `Document` model with file upload validation, MIME extraction, primary resume toggling, and application attachments.
+  * `apps.ai_assistant`: Heuristic semantic keyword engine, ATS scoring algorithm, tone-calibrated cover letter generator, and STAR interview question coach.
+  * `apps.billing`: `Subscription` model, Free vs. Pro plan entitlements, quota consumption counters, and upgrade/cancellation actions.
 * **Standard Response Envelope**:
   ```json
   {"success": true, "data": {}}
   ```
-* **Security & Isolation**:
-  * Every model is explicitly scoped to `user_id`.
-  * File uploads are stored in isolated per-user directories under `media/users/<user_id>/documents/`.
+* **Security & Multi-Tenant Isolation**:
+  * Every database query is strictly scoped to `request.user`.
+  * File uploads stored in per-user isolated paths (`media/users/<user_id>/documents/`).
 
-## Environments
+---
 
-* **Local Dev**: Run `start_project.bat` or `start_project.ps1` to launch Django (`http://127.0.0.1:8000`) and Next.js (`http://localhost:3000`).
-* **Interactive Docs**: Swagger UI at `http://127.0.0.1:8000/api/v1/docs/`.
-* **Test Suite**: Automated tests run with `$env:DB_ENGINE='sqlite'; .venv\Scripts\python.exe manage.py test`.
+## 3. DevOps & CI/CD
+
+* **Multi-Stage Dockerfiles**:
+  * `frontend/Dockerfile`: Node.js 20 Alpine standalone runner (<120MB image) running as non-root `nextjs` user.
+  * `backend/Dockerfile`: Python 3.12-slim base with Gunicorn WSGI/ASGI concurrency and non-root `appuser`.
+* **Docker Compose (`docker-compose.yml`)**: Single-command orchestrator for PostgreSQL 16, Redis 7, Django API, and Next.js Frontend.
+* **GitHub Actions (`.github/workflows/`)**:
+  * `ci.yml`: Automated PostgreSQL test suite execution (41/41 tests passing) and Next.js production build verification.
+  * `deploy.yml`: Automated container build and registry publication.
