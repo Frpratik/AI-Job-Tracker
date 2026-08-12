@@ -1,72 +1,49 @@
 # Architecture
 
-## Boundaries
+## System Overview
 
-JobTracker uses a monorepo with independently deployable mobile and API
-applications. Flutter owns presentation and device concerns. Django owns
-validation, authorization, workflows, and durable state. PostgreSQL is the
-system of record.
+JobTracker uses a decoupled monorepo architecture:
+* **Frontend**: Next.js 16 (App Router) + React 19 + TypeScript with custom Modern CSS Design System.
+* **Backend**: Django 5.2 + Django REST Framework (`/api/v1`) with modular apps (`accounts`, `applications`, `documents`).
+* **Database**: PostgreSQL (Production/Docker) / SQLite (Fast Local Test/Dev).
 
 ```text
-Flutter (Riverpod + repositories)
+Next.js 16 (App Router + React 19 + TypeScript)
         |
-        | REST / JSON / JWT
+        | REST / JSON / JWT (Bearer auth + refresh rotation)
         v
 Django REST Framework (/api/v1)
+        ├── apps.accounts     (Auth, JWT tokens, Onboarding profiles)
+        ├── apps.applications (Pipeline, Jobs, Recruiters, Interviews, Activity, Reminders)
+        └── apps.documents    (Resumes, Cover Letters, PDF Storage & Preview)
         |
         v
-PostgreSQL
+PostgreSQL / SQLite
 ```
 
-## Mobile
+## Frontend Architecture (`frontend/`)
 
-The Flutter client is feature-based. Each feature may contain `presentation`,
-`application`, and `data` folders. Shared routing, networking, secure storage,
-and design tokens live under `lib/src/core`.
+* **App Router (`src/app/`)**: High-performance streaming routes for Dashboard, Pipeline, Applications, Documents, Calendar, Recruiters, and Settings.
+* **Modern Design System (`src/app/globals.css`)**: Emerald & slate color tokens, responsive sidebar, glassmorphic surfaces, instant dark/light mode switching, and micro-animations.
+* **API Client (`src/lib/api.ts`)**: Resilient HTTP client with automatic `Authorization: Bearer <token>` injection and seamless token refresh retry on `401 Unauthorized`.
+* **State & Auth (`src/context/AuthContext.tsx`)**: Global user session with automatic token hydration and demo mode support.
 
-Riverpod is the state-management boundary. It keeps asynchronous state explicit,
-is simple to replace in tests, and avoids coupling domain operations to widget
-contexts. Dio provides bounded network timeouts and a single refresh-token retry.
-Tokens use platform secure storage and are never persisted in preferences or
-logs.
+## Backend Architecture (`backend/`)
 
-## API
-
-The backend currently has `accounts` and `applications` bounded contexts. The
-applications context owns companies, jobs, tracked applications, status
-history, notes, and tags. New Django apps are introduced only when a feature
-owns distinct models and workflows; the project does not pre-create empty apps.
-
-API responses follow one of these shapes:
-
-```json
-{"success": true, "data": {}}
-```
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Unable to process the request.",
-    "fields": {}
-  }
-}
-```
-
-JWT access tokens are short-lived. Refresh tokens rotate and are blacklisted
-after use. All private endpoints default to authenticated access.
-
-## Data ownership
-
-Private feature tables must have an unambiguous owner relationship. Querysets
-must be scoped to `request.user` before object lookup. Client-provided user IDs
-must never determine ownership.
+* **Apps Layout**:
+  * `apps.accounts`: Custom `User` model, email verification, password reset, and career `Profile`.
+  * `apps.applications`: `Application`, `Company`, `Job`, `StatusHistory`, `Note`, `Tag`, `Recruiter`, `Interview`, `Communication`, `Reminder`, `Notification`.
+  * `apps.documents`: `Document` (Resumes, cover letters, portfolios, attachments, storage, and primary resume toggling).
+* **Standard Response Envelope**:
+  ```json
+  {"success": true, "data": {}}
+  ```
+* **Security & Isolation**:
+  * Every model is explicitly scoped to `user_id`.
+  * File uploads are stored in isolated per-user directories under `media/users/<user_id>/documents/`.
 
 ## Environments
 
-- Development: Docker PostgreSQL plus local Django and Flutter processes.
-- Test: isolated SQLite for fast unit/API tests; PostgreSQL integration tests
-  will be added with application models.
-- Staging/production: managed PostgreSQL, HTTPS, private object storage, and
-  environment-managed secrets.
+* **Local Dev**: Run `start_project.bat` or `start_project.ps1` to launch Django (`http://127.0.0.1:8000`) and Next.js (`http://localhost:3000`).
+* **Interactive Docs**: Swagger UI at `http://127.0.0.1:8000/api/v1/docs/`.
+* **Test Suite**: Automated tests run with `$env:DB_ENGINE='sqlite'; .venv\Scripts\python.exe manage.py test`.

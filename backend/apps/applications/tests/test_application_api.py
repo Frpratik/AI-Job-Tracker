@@ -164,3 +164,108 @@ class ApplicationApiTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Application.objects.filter(pk=application_id).exists())
+
+    def test_recruiter_management_and_scoping(self):
+        company = Company.objects.create(user=self.user, name="Meta")
+        response = self.client.post(
+            reverse("recruiter-list"),
+            {
+                "name": "Alex Recruiter",
+                "email": "alex@meta.example",
+                "company_id": company.id,
+                "phone": "+1 555-0100",
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(response.data["success"])
+        recruiter_id = response.data["data"]["id"]
+
+        # Other user cannot access this recruiter
+        self.client.force_authenticate(self.other)
+        blocked = self.client.get(reverse("recruiter-detail", args=(recruiter_id,)))
+        self.assertEqual(blocked.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_interview_scheduling_and_calendar_events(self):
+        created = self.create_application()
+        app_id = created.data["data"]["id"]
+
+        response = self.client.post(
+            reverse("application-interviews", args=(app_id,)),
+            {
+                "title": "System Design Round",
+                "round_number": 1,
+                "interview_type": "system_design",
+                "scheduled_at": "2026-09-01T15:00:00Z",
+                "duration_minutes": 60,
+                "meeting_url": "https://meet.example.com/sys-design",
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["data"]["title"], "System Design Round")
+
+        # Calendar endpoint returns this event
+        calendar_res = self.client.get(reverse("calendar-events"))
+        self.assertEqual(calendar_res.status_code, status.HTTP_200_OK)
+        events = calendar_res.data["data"]
+        self.assertTrue(any(e["title"] == "System Design Round" for e in events))
+
+    def test_communication_logging(self):
+        created = self.create_application()
+        app_id = created.data["data"]["id"]
+
+        response = self.client.post(
+            reverse("application-communications", args=(app_id,)),
+            {
+                "channel": "email",
+                "direction": "inbound",
+                "summary": "Invitation to schedule first round",
+                "contact_date": "2026-08-15T10:00:00Z",
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["data"]["summary"], "Invitation to schedule first round")
+
+    def test_reminder_toggle_complete(self):
+        created = self.create_application()
+        app_id = created.data["data"]["id"]
+
+        rem_res = self.client.post(
+            reverse("reminder-list"),
+            {
+                "application_id": app_id,
+                "title": "Follow up with HR",
+                "reminder_type": "follow_up",
+                "due_at": "2026-08-20T09:00:00Z",
+            },
+            format="json",
+        )
+        self.assertEqual(rem_res.status_code, status.HTTP_201_CREATED)
+        rem_id = rem_res.data["data"]["id"]
+
+        toggle_res = self.client.post(reverse("reminder-toggle-complete", args=(rem_id,)))
+        self.assertEqual(toggle_res.status_code, status.HTTP_200_OK)
+        self.assertTrue(toggle_res.data["data"]["is_completed"])
+
+    def test_convert_wishlist_to_applied(self):
+        saved = self.create_application(company="Apple", title="iOS Engineer")
+        app_id = saved.data["data"]["id"]
+
+        # Put in wishlist
+        self.client.patch(
+            reverse("application-change-status", args=(app_id,)),
+            {"status": "wishlist"},
+            format="json",
+        )
+
+        convert_res = self.client.post(
+            reverse("application-convert-wishlist", args=(app_id,)),
+            {"source": "Direct Apply", "applied_date": "2026-08-15"},
+            format="json",
+        )
+        self.assertEqual(convert_res.status_code, status.HTTP_200_OK)
+        self.assertEqual(convert_res.data["data"]["status"], "applied")
+        self.assertEqual(convert_res.data["data"]["source"], "Direct Apply")
+

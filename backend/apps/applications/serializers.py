@@ -6,9 +6,14 @@ from .models import (
     Application,
     ApplicationStatusHistory,
     ApplicationTag,
+    Communication,
     Company,
+    Interview,
     Job,
     Note,
+    Notification,
+    Recruiter,
+    Reminder,
     Tag,
 )
 from .services import record_initial_status, transition_status
@@ -92,16 +97,178 @@ class NoteSerializer(serializers.ModelSerializer):
         read_only_fields = ("id", "created_at", "updated_at")
 
 
+class RecruiterSerializer(serializers.ModelSerializer):
+    company_name = serializers.CharField(source="company.name", read_only=True)
+    company_id = serializers.PrimaryKeyRelatedField(
+        queryset=Company.objects.all(), source="company", required=False, allow_null=True
+    )
+
+    class Meta:
+        model = Recruiter
+        fields = (
+            "id",
+            "name",
+            "email",
+            "phone",
+            "linkedin_url",
+            "notes",
+            "last_contact_date",
+            "next_follow_up_date",
+            "company_id",
+            "company_name",
+            "created_at",
+            "updated_at",
+        )
+        read_only_fields = ("id", "created_at", "updated_at")
+
+    def validate_company_id(self, value):
+        if value and value.user != self.context["request"].user:
+            raise serializers.ValidationError("Invalid company selected.")
+        return value
+
+
+class InterviewSerializer(serializers.ModelSerializer):
+    interview_type_label = serializers.CharField(source="get_interview_type_display", read_only=True)
+    status_label = serializers.CharField(source="get_status_display", read_only=True)
+    company_name = serializers.CharField(source="application.job.company.name", read_only=True)
+    job_title = serializers.CharField(source="application.job.title", read_only=True)
+    application_id = serializers.UUIDField(source="application.id", read_only=True)
+
+    class Meta:
+        model = Interview
+        fields = (
+            "id",
+            "application_id",
+            "title",
+            "round_number",
+            "interview_type",
+            "interview_type_label",
+            "status",
+            "status_label",
+            "scheduled_at",
+            "duration_minutes",
+            "interviewer_name",
+            "interviewer_email",
+            "meeting_url",
+            "location",
+            "notes",
+            "feedback",
+            "company_name",
+            "job_title",
+            "created_at",
+            "updated_at",
+        )
+        read_only_fields = ("id", "created_at", "updated_at")
+
+
+class CommunicationSerializer(serializers.ModelSerializer):
+    channel_label = serializers.CharField(source="get_channel_display", read_only=True)
+    direction_label = serializers.CharField(source="get_direction_display", read_only=True)
+    recruiter_name = serializers.CharField(source="recruiter.name", read_only=True)
+    recruiter_id = serializers.PrimaryKeyRelatedField(
+        queryset=Recruiter.objects.all(), source="recruiter", required=False, allow_null=True
+    )
+    application_id = serializers.UUIDField(source="application.id", read_only=True)
+
+    class Meta:
+        model = Communication
+        fields = (
+            "id",
+            "application_id",
+            "recruiter_id",
+            "recruiter_name",
+            "channel",
+            "channel_label",
+            "direction",
+            "direction_label",
+            "summary",
+            "details",
+            "contact_date",
+            "follow_up_date",
+            "created_at",
+        )
+        read_only_fields = ("id", "created_at")
+
+    def validate_recruiter_id(self, value):
+        if value and value.user != self.context["request"].user:
+            raise serializers.ValidationError("Invalid recruiter selected.")
+        return value
+
+
+class ReminderSerializer(serializers.ModelSerializer):
+    reminder_type_label = serializers.CharField(source="get_reminder_type_display", read_only=True)
+    company_name = serializers.CharField(source="application.job.company.name", read_only=True)
+    job_title = serializers.CharField(source="application.job.title", read_only=True)
+    application_id = serializers.PrimaryKeyRelatedField(
+        queryset=Application.objects.all(), source="application", required=False, allow_null=True
+    )
+
+    class Meta:
+        model = Reminder
+        fields = (
+            "id",
+            "application_id",
+            "interview",
+            "title",
+            "reminder_type",
+            "reminder_type_label",
+            "due_at",
+            "is_completed",
+            "completed_at",
+            "notes",
+            "company_name",
+            "job_title",
+            "created_at",
+        )
+        read_only_fields = ("id", "completed_at", "created_at")
+
+    def validate_application_id(self, value):
+        if value and value.user != self.context["request"].user:
+            raise serializers.ValidationError("Invalid application selected.")
+        return value
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    notification_type_label = serializers.CharField(source="get_notification_type_display", read_only=True)
+
+    class Meta:
+        model = Notification
+        fields = (
+            "id",
+            "title",
+            "message",
+            "notification_type",
+            "notification_type_label",
+            "related_application",
+            "is_read",
+            "created_at",
+        )
+        read_only_fields = ("id", "created_at")
+
+
 class ApplicationSerializer(serializers.ModelSerializer):
     job = JobSerializer()
     status_label = serializers.CharField(source="get_status_display", read_only=True)
     priority_label = serializers.CharField(source="get_priority_display", read_only=True)
     status_history = StatusHistorySerializer(many=True, read_only=True)
     notes = NoteSerializer(many=True, read_only=True)
+    interviews = InterviewSerializer(many=True, read_only=True)
+    communications = CommunicationSerializer(many=True, read_only=True)
+    reminders = ReminderSerializer(many=True, read_only=True)
+    primary_recruiter = RecruiterSerializer(read_only=True)
+    primary_recruiter_id = serializers.PrimaryKeyRelatedField(
+        queryset=Recruiter.objects.all(),
+        source="primary_recruiter",
+        required=False,
+        allow_null=True,
+        write_only=True,
+    )
     tags = serializers.SerializerMethodField()
     tag_ids = serializers.ListField(
         child=serializers.UUIDField(), write_only=True, required=False, default=list
     )
+
+    documents = serializers.SerializerMethodField()
 
     class Meta:
         model = Application
@@ -115,13 +282,25 @@ class ApplicationSerializer(serializers.ModelSerializer):
             "priority",
             "priority_label",
             "is_archived",
+            "primary_recruiter",
+            "primary_recruiter_id",
             "tags",
             "tag_ids",
             "notes",
+            "interviews",
+            "communications",
+            "reminders",
+            "documents",
             "status_history",
             "created_at",
             "updated_at",
         )
+
+    def get_documents(self, obj):
+        from apps.documents.serializers import DocumentSerializer
+        docs = obj.documents.all()
+        return DocumentSerializer(docs, many=True, context=self.context).data
+
         read_only_fields = ("id", "created_at", "updated_at")
 
     @extend_schema_field(TagSerializer(many=True))
@@ -201,11 +380,20 @@ class StatusTransitionSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=Application.Status.choices)
 
 
+class ConvertWishlistSerializer(serializers.Serializer):
+    applied_date = serializers.DateField(required=False)
+    source = serializers.CharField(max_length=80, required=False, allow_blank=True)
+
+
 class DashboardSerializer(serializers.Serializer):
     total = serializers.IntegerField()
     active = serializers.IntegerField()
     interviews = serializers.IntegerField()
     offers = serializers.IntegerField()
     rejected = serializers.IntegerField()
+    saved_jobs = serializers.IntegerField()
     funnel = serializers.DictField(child=serializers.IntegerField())
+    upcoming_interviews = InterviewSerializer(many=True)
+    pending_reminders = ReminderSerializer(many=True)
     recent = ApplicationSerializer(many=True)
+
