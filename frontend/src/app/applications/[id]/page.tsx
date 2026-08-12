@@ -30,6 +30,7 @@ import {
   Bookmark,
   MessageSquare,
   Sparkles,
+  Award,
   FileText,
   Upload,
   Download,
@@ -269,6 +270,24 @@ export default function ApplicationDetailPage({
                   </select>
                 </div>
               )}
+
+              <Link
+                href={`/ai-copilot?tab=ats&application_id=${appId}`}
+                className="btn-secondary"
+                style={{ padding: '0.45rem 0.85rem', fontSize: '0.825rem', borderColor: 'rgba(99, 102, 241, 0.4)' }}
+                title="Run AI ATS Scan"
+              >
+                <Sparkles size={14} color="var(--accent-indigo)" /> AI Match Scan
+              </Link>
+
+              <Link
+                href={`/ai-copilot?tab=interview_prep&application_id=${appId}`}
+                className="btn-secondary"
+                style={{ padding: '0.45rem 0.85rem', fontSize: '0.825rem' }}
+                title="AI Mock Interview Prep"
+              >
+                <Award size={14} color="var(--primary)" /> AI Interview Prep
+              </Link>
 
               <button
                 className="btn-ghost"

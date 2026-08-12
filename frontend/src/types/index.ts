@@ -249,3 +249,45 @@ export interface AnalyticsData {
   };
   weekly_activity: WeeklyActivityItem[];
 }
+
+export interface ATSScanResult {
+  score: number;
+  score_label: string;
+  matched_keywords: string[];
+  missing_keywords: string[];
+  hard_skills_match_pct: number;
+  soft_skills_match_pct: number;
+  strengths: string[];
+  improvement_suggestions: string[];
+}
+
+export interface CoverLetterResult {
+  job_title: string;
+  company_name: string;
+  tone: string;
+  content: string;
+}
+
+export interface StarFramework {
+  situation: string;
+  task: string;
+  action: string;
+  result: string;
+}
+
+export interface InterviewQuestion {
+  id: number;
+  category: string;
+  question: string;
+  why_they_ask: string;
+  talking_points: string[];
+  star_framework: StarFramework;
+}
+
+export interface InterviewPrepResult {
+  job_title: string;
+  company_name: string;
+  interview_type: string;
+  total_questions: number;
+  questions: InterviewQuestion[];
+}

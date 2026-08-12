@@ -107,6 +107,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const navItems = [
     { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { label: 'Applications & Jobs', href: '/applications', icon: Briefcase },
+    { label: 'AI Career Copilot', href: '/ai-copilot', icon: Sparkles },
     { label: 'Documents & Resumes', href: '/documents', icon: FileText },
     { label: 'Analytics & Insights', href: '/analytics', icon: TrendingUp },
     { label: 'Calendar & Schedule', href: '/calendar', icon: Calendar },
