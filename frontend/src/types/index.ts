@@ -291,3 +291,23 @@ export interface InterviewPrepResult {
   total_questions: number;
   questions: InterviewQuestion[];
 }
+
+export interface Subscription {
+  id: string;
+  plan: 'free' | 'pro_monthly' | 'pro_yearly';
+  plan_label: string;
+  status: 'active' | 'past_due' | 'canceled' | 'trialing';
+  status_label: string;
+  is_pro: boolean;
+  ai_scans_used_this_month: number;
+  cover_letters_used_this_month: number;
+  max_applications: number | null;
+  max_ai_scans: number | null;
+  max_cover_letters: number | null;
+  max_resumes: number | null;
+  current_application_count: number;
+  current_resume_count: number;
+  current_period_end?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}

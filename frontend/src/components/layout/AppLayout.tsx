@@ -9,6 +9,7 @@ import {
   Briefcase,
   FileText,
   TrendingUp,
+  CreditCard,
   Calendar,
   Users,
   UserCheck,
@@ -112,6 +113,7 @@ export function AppLayout({ children }: AppLayoutProps) {
     { label: 'Analytics & Insights', href: '/analytics', icon: TrendingUp },
     { label: 'Calendar & Schedule', href: '/calendar', icon: Calendar },
     { label: 'Recruiters Directory', href: '/recruiters', icon: Users },
+    { label: 'Pricing & Plans', href: '/billing', icon: CreditCard },
     { label: 'Profile & Settings', href: '/profile', icon: UserCheck },
   ];
 

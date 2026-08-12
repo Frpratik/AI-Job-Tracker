@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "apps.applications",
     "apps.documents",
     "apps.ai_assistant",
+    "apps.billing",
 ]
 
 MIDDLEWARE = [
