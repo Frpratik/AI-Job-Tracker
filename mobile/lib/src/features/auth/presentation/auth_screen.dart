@@ -19,6 +19,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   final _name = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
+  final _confirmPassword = TextEditingController();
   bool _obscure = true;
 
   @override
@@ -26,6 +27,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     _name.dispose();
     _email.dispose();
     _password.dispose();
+    _confirmPassword.dispose();
     super.dispose();
   }
 
@@ -133,6 +135,20 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           ? 'Password must be at least 8 characters.'
                           : null,
                     ),
+                    if (widget.register) ...[
+                      const SizedBox(height: AppSpacing.md),
+                      TextFormField(
+                        controller: _confirmPassword,
+                        obscureText: _obscure,
+                        onFieldSubmitted: (_) => _submit(),
+                        decoration: const InputDecoration(
+                          labelText: 'Confirm password',
+                        ),
+                        validator: (value) => value != _password.text
+                            ? 'Passwords do not match.'
+                            : null,
+                      ),
+                    ],
                     if (!widget.register)
                       Align(
                         alignment: Alignment.centerRight,

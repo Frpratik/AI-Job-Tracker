@@ -124,10 +124,14 @@ class ApiClient {
     if (body is Map<String, dynamic>) {
       final apiError = body['error'];
       if (apiError is Map<String, dynamic>) {
+        final fields = apiError['fields'] as Map<String, dynamic>?;
+        final fieldMessage = _firstFieldMessage(fields);
+        final apiMessage =
+            apiError['message'] as String? ?? 'Unable to complete the request.';
         return ApiException(
-          apiError['message'] as String? ?? 'Unable to complete the request.',
+          fieldMessage ?? apiMessage,
           code: apiError['code'] as String? ?? 'REQUEST_ERROR',
-          fields: apiError['fields'] as Map<String, dynamic>?,
+          fields: fields,
         );
       }
     }
@@ -139,5 +143,22 @@ class ApiClient {
       );
     }
     return const ApiException('Something went wrong. Please try again.');
+  }
+
+  String? _firstFieldMessage(dynamic value) {
+    if (value is String && value.trim().isNotEmpty) return value;
+    if (value is List) {
+      for (final item in value) {
+        final message = _firstFieldMessage(item);
+        if (message != null) return message;
+      }
+    }
+    if (value is Map) {
+      for (final item in value.values) {
+        final message = _firstFieldMessage(item);
+        if (message != null) return message;
+      }
+    }
+    return null;
   }
 }

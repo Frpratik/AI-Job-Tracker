@@ -12,10 +12,11 @@ import '../../features/onboarding/presentation/profile_setup_screen.dart';
 import '../../features/shell/presentation/app_shell.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final auth = ref.watch(authControllerProvider);
-  return GoRouter(
+  late final GoRouter router;
+  router = GoRouter(
     initialLocation: '/welcome',
     redirect: (context, state) {
+      final auth = ref.read(authControllerProvider);
       final public = {
         '/welcome',
         '/login',
@@ -33,7 +34,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
       if (auth.status == AuthStatus.signedIn &&
           onboardingComplete &&
-          (public || state.matchedLocation == '/onboarding')) {
+          (public ||
+              state.matchedLocation == '/loading' ||
+              state.matchedLocation == '/onboarding')) {
         return '/home';
       }
       return null;
@@ -74,6 +77,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
+  ref.listen<AuthState>(authControllerProvider, (_, _) => router.refresh());
+  ref.onDispose(router.dispose);
+  return router;
 });
 
 class _LoadingScreen extends StatelessWidget {
