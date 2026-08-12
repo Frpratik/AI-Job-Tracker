@@ -307,7 +307,7 @@ function ApplicationsContent() {
               onClick={() => router.push(`/applications/${app.id}`)}
             >
               {/* Company & Role Details */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', minWidth: '260px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: '1 1 240px', minWidth: 0 }}>
                 <div
                   style={{
                     width: '46px',

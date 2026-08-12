@@ -181,7 +181,7 @@ export default function AnalyticsPage() {
         ) : (
           <>
             {/* 4 Executive Metric Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
               {/* Interview Rate */}
               <div className="card glass-panel" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -375,7 +375,7 @@ export default function AnalyticsPage() {
             </div>
 
             {/* 2-Column Grid: Discovery Source ROI + Weekly Activity Velocity */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '1.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
               {/* Discovery Source ROI */}
               <div className="card glass-panel" style={{ padding: '1.75rem' }}>
                 <div style={{ marginBottom: '1.25rem' }}>

@@ -26,7 +26,7 @@
   --bg-card: #111726;
   --bg-card-hover: #161e31;
   --bg-subtle: #192238;
-  --bg-glass: rgba(17, 23, 38, 0.75);
+  --bg-glass: rgba(17, 23, 38, 0.85);
   --border-color: rgba(255, 255, 255, 0.08);
   --border-hover: rgba(255, 255, 255, 0.16);
 
@@ -50,7 +50,7 @@
   --bg-card: #ffffff;
   --bg-card-hover: #f1f5f9;
   --bg-subtle: #e2e8f0;
-  --bg-glass: rgba(255, 255, 255, 0.85);
+  --bg-glass: rgba(255, 255, 255, 0.9);
   --border-color: rgba(0, 0, 0, 0.08);
   --border-hover: rgba(0, 0, 0, 0.16);
 
@@ -70,13 +70,14 @@
   margin: 0;
 }
 
-body {
+html, body {
   font-family: var(--font-sans);
   background-color: var(--bg-main);
   color: var(--text-main);
   min-height: 100vh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
 }
 
 a {
@@ -84,7 +85,7 @@ a {
   text-decoration: none;
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -100,7 +101,7 @@ a {
   background: var(--text-subtle);
 }
 
-/* Glass Card */
+/* Glass Panels & Cards */
 .glass-panel {
   background: var(--bg-glass);
   backdrop-filter: blur(16px);
@@ -122,11 +123,12 @@ a {
   box-shadow: var(--shadow-lg);
 }
 
-/* Buttons */
+/* Buttons with Touch-friendly defaults */
 .btn-primary {
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
   color: #ffffff;
   font-weight: 600;
+  min-height: 42px;
   padding: 0.65rem 1.25rem;
   border-radius: var(--radius-md);
   border: none;
@@ -138,6 +140,7 @@ a {
   font-size: 0.925rem;
   transition: all 0.2s ease;
   box-shadow: var(--shadow-sm), var(--shadow-glow);
+  white-space: nowrap;
 }
 .btn-primary:hover {
   opacity: 0.95;
@@ -157,6 +160,7 @@ a {
   background-color: var(--bg-subtle);
   color: var(--text-main);
   font-weight: 600;
+  min-height: 42px;
   padding: 0.65rem 1.25rem;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
@@ -167,6 +171,7 @@ a {
   gap: 0.5rem;
   font-size: 0.925rem;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 .btn-secondary:hover {
   background-color: var(--bg-card-hover);
@@ -177,14 +182,17 @@ a {
   background: transparent;
   color: var(--text-muted);
   font-weight: 500;
+  min-height: 40px;
   padding: 0.5rem 0.85rem;
   border-radius: var(--radius-md);
   border: none;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.4rem;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 .btn-ghost:hover {
   background-color: var(--bg-subtle);
@@ -202,6 +210,7 @@ a {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
+  white-space: nowrap;
 }
 .badge-emerald {
   background-color: var(--primary-light);
@@ -237,6 +246,7 @@ a {
 /* Form Inputs */
 .input-field {
   width: 100%;
+  min-height: 42px;
   background-color: var(--bg-main);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
@@ -300,15 +310,63 @@ a {
   pointer-events: none;
 }
 
-/* Responsive Utilities */
+/* Responsive Utilities & Breakpoints */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Mobile & Tablet Media Queries */
+@media (max-width: 1024px) {
+  .card {
+    padding: 1.25rem;
+  }
+}
+
 @media (max-width: 768px) {
   .hidden-mobile {
     display: none !important;
   }
+  
+  .card {
+    padding: 1.15rem;
+    border-radius: var(--radius-md);
+  }
+
+  .glass-panel {
+    border-radius: var(--radius-md);
+  }
+
+  h2 {
+    font-size: 1.5rem !important;
+  }
+  h3 {
+    font-size: 1.2rem !important;
+  }
+
+  /* Safe bottom padding so bottom nav doesn't cover content */
+  .mobile-page-container {
+    padding-bottom: 84px !important;
+  }
 }
+
 @media (min-width: 769px) {
   .show-mobile {
     display: none !important;
   }
 }
 
+@media (max-width: 480px) {
+  .btn-primary, .btn-secondary {
+    font-size: 0.85rem;
+    padding: 0.55rem 0.95rem;
+  }
+  
+  .input-field {
+    font-size: 0.875rem;
+    padding: 0.65rem 0.85rem;
+  }
+}

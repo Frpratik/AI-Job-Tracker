@@ -113,7 +113,16 @@ export default function CalendarPage() {
             </button>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.65rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+          <div
+            className="hide-scrollbar"
+            style={{
+              display: 'flex',
+              gap: '0.65rem',
+              overflowX: 'auto',
+              paddingBottom: '0.5rem',
+              WebkitOverflowScrolling: 'touch',
+            }}
+          >
             {dateStrip.map((d, i) => {
               const isSelected = isSameDay(d, selectedDate);
               const isToday = isSameDay(d, new Date());

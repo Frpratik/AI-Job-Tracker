@@ -379,7 +379,7 @@ function AICopilotContent() {
 
       {/* TAB 1: ATS RESUME SCANNER */}
       {activeTab === 'ats' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1.25rem' }}>
           {/* Form */}
           <div className="card glass-panel" style={{ padding: '1.75rem' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.35rem' }}>
@@ -536,7 +536,7 @@ function AICopilotContent() {
 
       {/* TAB 2: AI COVER LETTER STUDIO */}
       {activeTab === 'cover_letter' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1.25rem' }}>
           {/* Controls */}
           <div className="card glass-panel" style={{ padding: '1.75rem' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.35rem' }}>

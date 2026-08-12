@@ -364,9 +364,68 @@ export function AppLayout({ children }: AppLayoutProps) {
         )}
 
         {/* Main Body */}
-        <main style={{ flex: 1, padding: '1.5rem', maxWidth: '1440px', width: '100%', margin: '0 auto' }}>
+        <main
+          className="mobile-page-container"
+          style={{ flex: 1, padding: '1.25rem', maxWidth: '1440px', width: '100%', margin: '0 auto' }}
+        >
           {children}
         </main>
+
+        {/* Mobile Bottom Navigation Bar (Visible on mobile/tablet screens <= 768px) */}
+        <nav
+          className="glass-panel show-mobile"
+          style={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 40,
+            borderRadius: 0,
+            borderBottom: 'none',
+            borderLeft: 'none',
+            borderRight: 'none',
+            borderTop: '1px solid var(--border-color)',
+            backgroundColor: 'var(--bg-glass)',
+            backdropFilter: 'blur(16px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-around',
+            padding: '0.5rem 0.25rem',
+            paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))',
+          }}
+        >
+          {[
+            { label: 'Home', href: '/dashboard', icon: LayoutDashboard },
+            { label: 'Jobs', href: '/applications', icon: Briefcase },
+            { label: 'AI Copilot', href: '/ai-copilot', icon: Sparkles },
+            { label: 'Analytics', href: '/analytics', icon: TrendingUp },
+            { label: 'Plans', href: '/billing', icon: CreditCard },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = pathname === tab.href || pathname.startsWith(`${tab.href}/`);
+            return (
+              <Link
+                key={tab.href}
+                href={tab.href}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '0.2rem',
+                  padding: '0.35rem 0.5rem',
+                  borderRadius: 'var(--radius-sm)',
+                  color: isActive ? 'var(--primary)' : 'var(--text-muted)',
+                  fontSize: '0.68rem',
+                  fontWeight: isActive ? 800 : 500,
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <Icon size={19} strokeWidth={isActive ? 2.5 : 1.8} />
+                <span>{tab.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
       </div>
 
       {/* Global Modals */}

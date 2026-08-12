@@ -303,11 +303,13 @@ export default function ApplicationDetailPage({
 
         {/* Tab Navigation */}
         <div
+          className="hide-scrollbar"
           style={{
             display: 'flex',
             borderBottom: '1px solid var(--border-color)',
             gap: '0.5rem',
             overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch',
           }}
         >
           {[
